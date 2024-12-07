@@ -8,90 +8,69 @@ import {
   emptycartIteam,
 } from "../redux/features/cartSlice";
 import toast from "react-hot-toast";
-import { loadStripe } from "@stripe/stripe-js";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const CartDetails = () => {
   const { carts } = useSelector((state) => state.allCart);
 
   const [totalprice, setPrice] = useState(0);
   const [totalquantity, setTotalQuantity] = useState(0);
+  
 
   const dispatch = useDispatch();
 
-  // add to cart
+  // Add to cart
   const handleIncrement = (e) => {
     dispatch(addToCart(e));
   };
 
-  // remove to cart
+  // Remove from cart
   const handleDecrement = (e) => {
     dispatch(removeToCart(e));
-    toast.success("Item Remove From Your Cart");
+    toast.success("Item Removed From Your Cart");
   };
 
-  // remove single item
+  // Remove single item
   const handleSingleDecrement = (e) => {
     dispatch(removeSingleIteams(e));
   };
 
-  // empty cart
+  // Empty cart
   const emptycart = () => {
     dispatch(emptycartIteam());
     toast.success("Your Cart is Empty");
   };
 
-  // count total price
+  // Calculate total price
   const total = () => {
     let totalprice = 0;
-    carts.map((ele, ind) => {
-      totalprice = ele.price * ele.qnty + totalprice;
+    carts.forEach((ele) => {
+      totalprice += ele.price * ele.qnty;
     });
     setPrice(totalprice);
   };
 
-  // count total quantity
+  // Calculate total quantity
   const countquantity = () => {
     let totalquantity = 0;
-    carts.map((ele) => {
-      totalquantity = ele.qnty + totalquantity;
+    carts.forEach((ele) => {
+      totalquantity += ele.qnty;
     });
     setTotalQuantity(totalquantity);
   };
 
   useEffect(() => {
     total();
-  }, [total]);
-
-  useEffect(() => {
     countquantity();
-  }, [countquantity]);
+  }, [carts]);
 
-  // make payment
-
-  const makePayment = async () => {
-    const stripe = await loadStripe("pk_test_51OxFZhSGQc3MHlBJtRLbtL78PABWLzfUXa4jKKtVddaZ0YWoNEku1TfbXnSxwgfxXB28QgXfJvmOjlkbpgSz4VTc00UxSg7tJx");
-    const body = {
-      products: carts,
-    };
-    const header = {
-      "Content-Type": "application/json",
-    };
-    const response = await fetch(
-      "http://localhost:7000/api/create-checkout-session",
-      {
-        method: "POST",
-        headers: header,
-        body: JSON.stringify(body),
-      }
-    );
-    const session = await response.json();
-    const result = stripe.redirectToCheckout({
-      sessionId: session.id,
-    });
-    if (result.error) {
-      console.log(result.error);
-    }
+  // Handle successful payment
+  const handleApprove = (orderID) => {
+    console.log("Payment Successful with Order ID:", orderID);
+    toast.success("Payment Successful!");
+    emptycart();
   };
+
 
   return (
     <div className="row justify-content-center m-0">
@@ -100,7 +79,7 @@ const CartDetails = () => {
           <div className="card-header bg-dark p-3">
             <div className="card-header-flex">
               <h5 className="text-white m-0">
-                Cart Calculation{carts.length > 0 ? `(${carts.length})` : ""}
+                Cart Calculation{carts.length > 0 ? ` (${carts.length})` : ""}
               </h5>
               {carts.length > 0 && (
                 <button
@@ -179,8 +158,6 @@ const CartDetails = () => {
                             className="qty-input-box"
                             value={data.qnty}
                             disabled
-                            name=""
-                            id=""
                           />
                           <button
                             className="prdct-qty-btn"
@@ -207,20 +184,47 @@ const CartDetails = () => {
                       Total Price:{" "}
                       <span className="text-danger">₹ {totalprice}</span>
                     </th>
-                    <th className="text-right">
-                      <button
-                        className="btn btn-success"
-                        type="button"
-                        onClick={makePayment}
-                      >
-                        Checkout
-                      </button>
-                    </th>
                   </tr>
                 </tfoot>
               </table>
             )}
           </div>
+          {carts.length > 0 && (
+            <div className="p-3">
+              <PayPalScriptProvider
+                options={{
+                  "client-id":
+                    "ASUvqcyLZ5Qsh7ZigLVhpjgdIq-BiN5aqsHSxZ388THveSYT6hLzk9nqaRgKchEXajXRSQNU1RQmQTws",
+                  currency: "USD",
+                }}
+              >
+              
+                <PayPalButtons
+                  style={{ layout: "vertical" }}
+                  className=''
+                  createOrder={(data, actions) => {
+                    return actions.order.create({
+                      purchase_units: [
+                        {
+                          amount: {
+                            value: totalprice.toFixed(2),
+                          },
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={(data, actions) => {
+                    return actions.order.capture().then((details) => {
+                      console.log("Payment Successful:", details);
+                    });
+                  }}
+                  onError={(err) => {
+                    console.error("PayPal Error:", err);
+                  }}
+                />
+              </PayPalScriptProvider>
+            </div>
+          )}
         </div>
       </div>
     </div>

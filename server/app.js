@@ -1,35 +1,99 @@
 const express = require("express");
-const app = express();
 const cors = require("cors");
-const stripe = require("stripe")("sk_test_51OxFZhSGQc3MHlBJApLSEzHRyXQU9Kpjo8135v5SmKF2SI90bL6Du2fTAfYarc7RQxbhHdMSA1ONB3UySFiLcdbS00ZTt3u8cc");
+const dotenv = require("dotenv");
+const paypal = require("@paypal/checkout-server-sdk");
 
-app.use(express.json());
+dotenv.config();
+
+const app = express();
 app.use(cors());
+app.use(express.json());
 
+// Configure PayPal Environment
+const environment = new paypal.core.SandboxEnvironment(
+  process.env.PAYPAL_CLIENT_ID,
+  process.env.PAYPAL_SECRET
+);
+const paypalClient = new paypal.core.PayPalHttpClient(environment);
+
+// Stripe Checkout Session Route
 app.post("/api/create-checkout-session", async (req, res) => {
   const { products } = req.body;
-  const line_items = products.map((product) => ({
+
+  const lineItems = products.map((item) => ({
     price_data: {
-      currency: "inr",
-      product_data: {
-        name: product.dish,
-      },
-      unit_amount: product.price * 100,
+      currency: "USD",
+      product_data: { name: item.name },
+      unit_amount: item.price * 100,
     },
-    quantity: product.qnty,
+    quantity: item.qnty,
   }));
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: line_items,
-    mode: "payment", // Corrected parameter name
-    success_url: "http://localhost:3000/Sucess",
-    cancel_url: "http://localhost:3000/Cancell",
-  });
-
-  res.json({ id: session.id });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: lineItems,
+      success_url: "http://localhost:3000/success",
+      cancel_url: "http://localhost:3000/cancel",
+    });
+    res.status(200).json({ id: session.id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create Stripe session" });
+  }
 });
 
-app.listen(7000, () => {
-  console.log("Server started on port 7000");
+// PayPal Order Route
+app.post("/api/create-paypal-order", async (req, res) => {
+  const { products } = req.body;
+
+  const totalAmount = products.reduce(
+    (acc, product) => acc + product.price * product.qnty,
+    0
+  );
+
+  const request = new paypal.orders.OrdersCreateRequest();
+  request.prefer("return=representation");
+  request.requestBody({
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        amount: {
+          currency_code: "USD",
+          value: totalAmount.toFixed(2),
+        },
+      },
+    ],
+  });
+
+  try {
+    const order = await paypalClient.execute(request);
+    res.status(200).json({ id: order.result.id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create PayPal order" });
+  }
+});
+
+// PayPal Order Capture Route
+app.post("/api/capture-paypal-order", async (req, res) => {
+  const { orderId } = req.body;
+
+  const request = new paypal.orders.OrdersCaptureRequest(orderId);
+  request.requestBody({});
+
+  try {
+    const capture = await paypalClient.execute(request);
+    res.status(200).json({ status: "success", capture: capture.result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to capture PayPal order" });
+  }
+});
+
+// Start Server
+const PORT = process.env.PORT || 7000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

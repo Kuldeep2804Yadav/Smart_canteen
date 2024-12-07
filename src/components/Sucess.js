@@ -4,7 +4,7 @@ function Success() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Set isVisible to true after component mounts to trigger animation
+   
     setIsVisible(true);
   }, []);
 
