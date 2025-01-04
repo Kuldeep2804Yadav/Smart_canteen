@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-function Success() {
+function Success({data ,actions}) {
+  console.log(data)
+  console.log(actions);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {

@@ -1,48 +1,90 @@
-import React from "react";
-import Container from "react-bootstrap/Container";
-import Navbar from "react-bootstrap/Navbar";
-import Button from "react-bootstrap/Button"; // Import Button from react-bootstrap
+import React, { useState, useEffect } from "react";
+import { signOut } from "./firebase";
+import { useNavigate } from "react-router-dom";
+import { auth } from "./firebase";
+import { toast, Toaster } from "react-hot-toast";
+import "./header.css";
+import { FaShoppingCart } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
 
 const Headers = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   const { carts } = useSelector((state) => state.allCart);
-  const { logout, isAuthenticated, loginWithRedirect, user } = useAuth0();
+  console.log(carts.length);
+
+  useEffect(() => {
+    const checkAuthentication = () => {
+      const user = localStorage.getItem("idToken");
+      if (user) {
+        setIsAuthenticated(true);
+        setUser({ email: user.email });
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    };
+    checkAuthentication();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Clear session data
+      localStorage.removeItem("idToken");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userEmail");
+      setIsAuthenticated(false);
+      setUser(null);
+      navigate("/login");
+      toast.success("User logged out successfully!");
+    } catch (error) {
+      console.error("Error signing out:", error.message);
+    }
+  };
+  const cartHandler = () => {
+    if (carts.length === 0) {
+      toast.error("Your Cart is empty");
+      return;
+    } else {
+      navigate("/cart");
+    }
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
 
   return (
-    <>
-      <Navbar style={{ height: "60px", background: "black", color: "white", display:"flex" }}>
-        <Container className="d-flex justify-content-between align-items-center">
-          <NavLink to="/" className="text-decoration-none text-light">
-            <h3 className="text-light mb-0">Smart Canteen</h3>
-          </NavLink>
+    <nav className="header">
+      <div className="header-content">
+        <a href="/" className="brand-link">
+          <h3 className="brand-title">Smart Canteen</h3>
+        </a>
 
-          <div className="d-flex align-items-center">
-            <NavLink to="/cart" className="text-decoration-none text-light mx-2">
-              <div id="ex4">
-                <span className="p1 fa-stack fa-2x has-badge" data-count={carts.length}>
-                  <i className="fa-solid fa-cart-shopping"></i>
-                </span>
-              </div>
-            </NavLink>
-
-            {isAuthenticated ? (
-              <>
-                <p className="mb-0 me-2">{user.name}</p>
-                <Button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
-                  Log Out
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline-light" style={{marginLeft: "10px"}} onClick={() => loginWithRedirect()}>
-                Log In
-              </Button>
-            )}
-          </div>
-        </Container>
-      </Navbar>
-    </>
+        <div className="user-section">
+          {isAuthenticated ? (
+            <>
+              <FaShoppingCart
+                className="cart"
+                onClick={
+                  cartHandler
+                }
+              />
+              <button className="logout-btn" onClick={handleLogout}>
+                Log Out
+              </button>
+            </>
+          ) : (
+            <button className="login-btn" onClick={handleLogin}>
+              Log In
+            </button>
+          )}
+        </div>
+      </div>
+      <Toaster />
+    </nav>
   );
 };
 

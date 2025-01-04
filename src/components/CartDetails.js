@@ -15,7 +15,6 @@ const CartDetails = () => {
 
   const [totalprice, setPrice] = useState(0);
   const [totalquantity, setTotalQuantity] = useState(0);
-  
 
   const dispatch = useDispatch();
 
@@ -70,7 +69,6 @@ const CartDetails = () => {
     toast.success("Payment Successful!");
     emptycart();
   };
-
 
   return (
     <div className="row justify-content-center m-0">
@@ -139,7 +137,7 @@ const CartDetails = () => {
                           <p>{data.dish}</p>
                         </div>
                       </td>
-                      <td>{data.price}</td>
+                      <td>  $ {data.price}</td>
                       <td>
                         <div className="prdct-qty-container">
                           <button
@@ -168,7 +166,7 @@ const CartDetails = () => {
                           </button>
                         </div>
                       </td>
-                      <td className="text-right">₹ {data.qnty * data.price}</td>
+                      <td className="text-right">$ {data.qnty * data.price}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -182,7 +180,8 @@ const CartDetails = () => {
                     </th>
                     <th className="text-right">
                       Total Price:{" "}
-                      <span className="text-danger">₹ {totalprice}</span>
+                      <span className="text-danger">
+                      $ {totalprice}</span>
                     </th>
                   </tr>
                 </tfoot>
@@ -198,10 +197,8 @@ const CartDetails = () => {
                   currency: "USD",
                 }}
               >
-              
                 <PayPalButtons
                   style={{ layout: "vertical" }}
-                  className=''
                   createOrder={(data, actions) => {
                     return actions.order.create({
                       purchase_units: [
@@ -214,12 +211,23 @@ const CartDetails = () => {
                     });
                   }}
                   onApprove={(data, actions) => {
-                    return actions.order.capture().then((details) => {
-                      console.log("Payment Successful:", details);
-                    });
+                    return actions.order
+                      .capture()
+                      .then((details) => {
+                        console.log("Payment Details:", details);
+
+                        handleApprove(details.id);
+                      })
+                      .catch((err) => {
+                        console.error("Capture Error:", err);
+                        toast.error("Payment failed. Please try again.");
+                      });
                   }}
                   onError={(err) => {
                     console.error("PayPal Error:", err);
+                    toast.error(
+                      "Something went wrong with the payment process."
+                    );
                   }}
                 />
               </PayPalScriptProvider>

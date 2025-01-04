@@ -135,6 +135,72 @@ const Cardsdata = [
     qnty: 0,
   },
   
+  
+    {
+      "id": 10,
+      "dish": "Dosa King",
+      "imgdata": "https://png.pngtree.com/thumb_back/fh260/background/20230611/pngtree-dosa-is-sitting-on-a-plate-and-sauce-image_2887017.jpg",
+      "address": "South Indian, Dosa, Idli, Vada",
+      "delimg": "https://b.zmtcdn.com/data/o2_assets/0b07ef18234c6fdf9365ad1c274ae0631612687510.png?output-format=webp",
+      "somedata": "1200 + order placed from here recently",
+      "price": 2.5,
+      "rating": "4.2",
+      "arrimg": "https://b.zmtcdn.com/data/o2_assets/4bf016f32f05d26242cea342f30d47a31595763089.png?output-format=webp",
+      "qnty": 0
+    },
+    {
+      "id": 11,
+      "dish": "Biryani Factory",
+      "imgdata": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_264,h_288,c_fill/hgkmvgilkvps4zty3njg",
+      "address": "Biryani, Hyderabadi, Mughlai",
+      "delimg": "https://b.zmtcdn.com/data/o2_assets/0b07ef18234c6fdf9365ad1c274ae0631612687510.png?output-format=webp",
+      "somedata": "1500 + order placed from here recently",
+      "price": 3.8,
+      "rating": "4.5",
+      "arrimg": "https://b.zmtcdn.com/data/o2_assets/4bf016f32f05d26242cea342f30d47a31595763089.png?output-format=webp",
+      "qnty": 0
+    },
+    {
+      "id": 12,
+      "dish": "Chaat Junction",
+      "imgdata": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/5f4a527ddd5527269456e57a784347e4",
+      "address": "Chaat, Street Food",
+      "delimg": "https://b.zmtcdn.com/data/o2_assets/0b07ef18234c6fdf9365ad1c274ae0631612687510.png?output-format=webp",
+      "somedata": "600 + order placed from here recently",
+      "price": 1.2,
+      "rating": "4.6",
+      "arrimg": "https://b.zmtcdn.com/data/o2_assets/4bf016f32f05d26242cea342f30d47a31595763089.png?output-format=webp",
+      "qnty": 0
+    },
+    {
+      "id": 13,
+      "dish": "Kolkata Kathi Rolls",
+      "imgdata": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_264,h_288,c_fill/uaqt3w9ekgbf3kpjfa9s",
+      "address": "Kolkata, Rolls, Fast Food",
+      "delimg": "https://b.zmtcdn.com/data/o2_assets/0b07ef18234c6fdf9365ad1c274ae0631612687510.png?output-format=webp",
+      "somedata": "1300 + order placed from here recently",
+      "price": 2.2,
+      "rating": "3.9",
+      "arrimg": "https://b.zmtcdn.com/data/o2_assets/4bf016f32f05d26242cea342f30d47a31595763089.png?output-format=webp",
+      "qnty": 0
+    },
+    {
+      "id": 14,
+      "dish": "Pav Bhaji Corner",
+      "imgdata": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/uurpimkvy5skpnbdqlvp",
+      "address": "Street Food, Pav Bhaji",
+      "delimg": "https://b.zmtcdn.com/data/o2_assets/0b07ef18234c6fdf9365ad1c274ae0631612687510.png?output-format=webp",
+      "somedata": "800 + order placed from here recently",
+      "price": 1.5,
+      "rating": "4.3",
+      "arrimg": "https://b.zmtcdn.com/data/o2_assets/4bf016f32f05d26242cea342f30d47a31595763089.png?output-format=webp",
+      "qnty": 0
+    }
+  
+  
+  
+  
+  
 ];
 
 export default Cardsdata;
