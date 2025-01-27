@@ -2,7 +2,8 @@ import React from 'react'
 
 function Cancell() {
   return (
-    <div>Cancell</div>
+    <div>Cancell
+    </div>
   )
 }
 
