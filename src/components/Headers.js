@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { signOut } from "./firebase";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { toast, Toaster } from "react-hot-toast";
@@ -8,45 +8,41 @@ import { FaShoppingCart } from "react-icons/fa";
 import { useSelector } from "react-redux";
 
 const Headers = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const { carts } = useSelector((state) => state.allCart);
-  console.log(carts.length);
 
   useEffect(() => {
-    const checkAuthentication = () => {
-      const user = localStorage.getItem("idToken");
-      if (user) {
-        setIsAuthenticated(true);
-        setUser({ email: user.email });
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
       } else {
-        setIsAuthenticated(false);
         setUser(null);
       }
-    };
-    checkAuthentication();
+    });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
   }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // Clear session data
       localStorage.removeItem("idToken");
       localStorage.removeItem("userId");
       localStorage.removeItem("userEmail");
-      setIsAuthenticated(false);
       setUser(null);
       navigate("/login");
       toast.success("User logged out successfully!");
     } catch (error) {
       console.error("Error signing out:", error.message);
+      toast.error("Failed to log out.");
     }
   };
+
   const cartHandler = () => {
     if (carts.length === 0) {
       toast.error("Your Cart is empty");
-      return;
     } else {
       navigate("/cart");
     }
@@ -64,14 +60,9 @@ const Headers = () => {
         </a>
 
         <div className="user-section">
-          {isAuthenticated ? (
+          {user ? (
             <>
-              <FaShoppingCart
-                className="cart"
-                onClick={
-                  cartHandler
-                }
-              />
+              <FaShoppingCart className="cart" onClick={cartHandler} />
               <button className="logout-btn" onClick={handleLogout}>
                 Log Out
               </button>
